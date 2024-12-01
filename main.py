@@ -1,6 +1,8 @@
 import pygame
 import sys
 import time
+import random
+
 
 # Initialize Pygame and the audio mixer
 pygame.init()
@@ -8,10 +10,11 @@ pygame.mixer.init()
 
 # Set up the display
 screen = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Basic Pygame Window")
+pygame.display.set_caption("Breakout Menu") 
 
 # Variable to check if the game is running for the first time
 first = True
+score = 0
 
 # Set up the player
 player_color = (255, 0, 0)
@@ -52,32 +55,53 @@ def intro():
     font = pygame.font.Font(None, 74)
     screen.fill((0, 0, 0))
     text = font.render("Breakout", True, (255, 255, 255))
-    text_rect = text.get_rect(center=(width / 2, height / 2))
+    text_rect = text.get_rect(center=(width / 2, 100))
     screen.blit(text, text_rect)
     pygame.display.flip()
     pygame.time.wait(2000)
+    mode = show_menu()
+    return mode
 
+def show_menu():
+    font = pygame.font.Font(None, 74)
+    screen.fill((0, 0, 0))
+    modes = ["Standard", "No Death", "Hard Mode", "Exit"]
+    selected_mode = 0
 
-# Function to check if the player has won the game
-def check_win():
-    all_destroyed = True
-    for i in range(16):
-        for j in range(8):
-            if blocks[i][j][5] == 1:
-                all_destroyed = False
-                break
-        if not all_destroyed:
-            break
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    selected_mode = (selected_mode - 1) % len(modes)
+                elif event.key == pygame.K_DOWN:
+                    selected_mode = (selected_mode + 1) % len(modes)
+                elif event.key == pygame.K_RETURN:
+                    if modes[selected_mode] == "Exit":
+                        pygame.quit()
+                        sys.exit()
+                    else:
+                        return modes[selected_mode]
 
-    if all_destroyed:
-        # End the game and show a win message
-        win()
+        screen.fill((0, 0, 0))
+        for i, mode in enumerate(modes):
+            color = (255, 255, 255) if i == selected_mode else (100, 100, 100)
+            text = font.render(mode, True, color)
+            text_rect = text.get_rect(center=(width / 2, 200 + i * 100))
+            screen.blit(text, text_rect)
 
-# Function to win the game automatically
+        pygame.display.flip()
+
+# Function to win the game 
 def win():
     font = pygame.font.Font(None, 74)
     screen.fill((0, 0, 0))
     text = font.render("You Win", True, (255, 255, 255))
+    score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+    score_rect = score_text.get_rect(center=(width / 2, height / 2 + 100))
+    screen.blit(score_text, score_rect)
     text_rect = text.get_rect(center=(width / 2, height / 2))
     screen.blit(text, text_rect)
     pygame.display.flip()
@@ -87,11 +111,14 @@ def win():
     pygame.quit()
     sys.exit()
 
-# Function to lose the game automatically
+# Function to lose the game 
 def lose():
     font = pygame.font.Font(None, 74)
     screen.fill((0, 0, 0))
     text = font.render("You Lose", True, (255, 255, 255))
+    score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+    score_rect = score_text.get_rect(center=(width / 2, height / 2 + 100))
+    screen.blit(score_text, score_rect)
     text_rect = text.get_rect(center=(width / 2, height / 2))
     screen.blit(text, text_rect)
     pygame.display.flip()
@@ -105,7 +132,7 @@ def lose():
 def update_time():
     # Update the display title with the current time
     current_time = time.strftime("%H:%M:%S")
-    pygame.display.set_caption(f"Breakout - Time: {current_time}")
+    pygame.display.set_caption(f"Breakout - {mode} - Time: {current_time} - Score: {score}")
 
 def draw_objects():
     # Fill the screen with a black background
@@ -155,14 +182,10 @@ def draw_number(number):
 
 
 
-
-
-
-
 # Main game loop
 running = True
-intro()
-
+mode = intro()
+    
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -183,16 +206,29 @@ while running:
     if keys[pygame.K_r]:
         player_width += 5
 
+    if mode == "Hard Mode":
+        if random.randint(0,200) == 12:
+            ball_speed_x = -ball_speed_x
+        if random.randint(0,200) == 24:
+            ball_speed_y = -ball_speed_y
+
+
     ball.x += ball_speed_x
-    ball.y += ball_speed_y
+    ball.y += ball_speed_y  
+
     if ball.left <= 0 or ball.right >= width:
         ball_speed_x = -ball_speed_x
     if ball.top <= 0:
         ball_speed_y = -ball_speed_y
 
     if ball.bottom >= height:
+        if mode != "No Death":
         # End the game and show a lose message
-        lose()
+            lose()
+        else:
+            #bounce the ball back up
+            ball_speed_y = -ball_speed_y
+
 
     # Check for collisions
     if ball.colliderect(pygame.Rect(player_x, player_y, player_width, player_length)):
@@ -202,10 +238,12 @@ while running:
             if blocks[i][j][5] == 1:
                 if ball.colliderect(pygame.Rect(blocks[i][j][1], blocks[i][j][2], blocks[i][j][3], blocks[i][j][4])):
                     blocks[i][j][5] = 0
+                    score += 1
                     ball_speed_y = -ball_speed_y
 
                     # Check if all blocks are destroyed
-                    check_win()
+                    if score == 112:
+                        win()
 
     update_time()
     draw_objects()
