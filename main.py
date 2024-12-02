@@ -63,9 +63,10 @@ def intro():
     return mode
 
 def show_menu():
+
     font = pygame.font.Font(None, 74)
     screen.fill((0, 0, 0))
-    modes = ["Standard", "No Death", "Hard Mode", "Exit"]
+    modes = ["Standard", "No Death", "Hard Mode", "Infinite" , "Exit"]
     selected_mode = 0
 
     while True:
@@ -89,11 +90,135 @@ def show_menu():
         for i, mode in enumerate(modes):
             color = (255, 255, 255) if i == selected_mode else (100, 100, 100)
             text = font.render(mode, True, color)
-            text_rect = text.get_rect(center=(width / 2, 200 + i * 100))
+            text_rect = text.get_rect(center=(width / 2, 200 + i * 40))
             screen.blit(text, text_rect)
 
         pygame.display.flip()
 
+
+
+
+def choose_ball_color():
+    font = pygame.font.Font(None, 20)
+    screen.fill((0, 0, 0))
+    balls = ["White", "Blue", "Green", "Red", "Yellow", "Purple", "Orange" ]
+    selected_ball = 0
+    ball_color = (255, 255, 255)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    selected_ball = (selected_ball - 1) % len(balls)
+                elif event.key == pygame.K_DOWN:
+                    selected_ball = (selected_ball + 1) % len(balls)
+                elif event.key == pygame.K_RETURN:
+                    if balls[selected_ball] == "Exit":
+                        pygame.quit()
+                        sys.exit()
+                    else:
+                       return ball_color
+        screen.fill((0, 0, 0))
+
+        if balls[selected_ball] == "White":
+            ball_color = (255, 255, 255)
+        elif balls[selected_ball] == "Blue":
+            ball_color = (0, 0, 255)
+        elif balls[selected_ball] == "Green":
+            ball_color = (0, 255, 0)
+        elif balls[selected_ball] == "Red":
+            ball_color = (255, 0, 0)
+        elif balls[selected_ball] == "Yellow":
+            ball_color = (255, 255, 0)
+        elif balls[selected_ball] == "Purple":
+            ball_color = (128, 0, 128)
+        elif balls[selected_ball] == "Orange":
+            ball_color = (255, 165, 0)
+
+        color = (255, 255, 255)
+
+        font = pygame.font.Font(None, 60)
+        text = font.render("Choose the color of the ball", True, color)
+        text_rect = text.get_rect(center=(width / 2, height / 2 - 45))
+        screen.blit(text, text_rect)
+
+
+        up_arrow = font.render("^", True, color)
+        up_arrow_rect = up_arrow.get_rect(center=(width / 2 , height / 2 + 25))  
+        screen.blit(up_arrow, up_arrow_rect)
+
+        down_arrow = font.render("v", True, color)
+        down_arrow_rect = down_arrow.get_rect(center=(width / 2, height / 2 + 80))
+        screen.blit(down_arrow, down_arrow_rect)     
+
+
+        pygame.draw.ellipse(screen, ball_color, ball)
+
+
+        pygame.display.flip()
+
+def choose_music_track():
+    tracks = ["Track 1", "Track 2", "Track 3", "Track 4"]
+    selected_track = 0
+    music_track = "music/background_music1.mp3"
+
+    pygame.mixer.music.load(music_track)
+    pygame.mixer.music.play(-1)
+
+    while True:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    selected_track = (selected_track - 1) % len(tracks)
+                    music_track = track_selector(selected_track,tracks)
+                    pygame.mixer.music.load(music_track)
+                    pygame.mixer.music.play(-1)
+                    
+                elif event.key == pygame.K_DOWN:
+                    selected_track = (selected_track + 1) % len(tracks)
+                    music_track = track_selector(selected_track,tracks)
+                    pygame.mixer.music.load(music_track)
+                    pygame.mixer.music.play(-1)
+                elif event.key == pygame.K_RETURN:
+                    pygame.mixer.music.stop()
+                    return music_track
+                
+        
+
+
+        
+
+        screen.fill((0, 0, 0))
+
+        font = pygame.font.Font(None, 60)
+        text = font.render("Choose the music track", True, (255, 255, 255))
+        text_rect = text.get_rect(center=(width / 2, height / 2 - 45))
+        screen.blit(text, text_rect)
+
+        for i, track in enumerate(tracks):
+            color = (255, 255, 255) if i == selected_track else (100, 100, 100)
+            text = font.render(track, True, color)
+            text_rect = text.get_rect(center=(width / 2, height / 2 + i * 40))
+            screen.blit(text, text_rect)
+
+        pygame.display.flip()
+def track_selector(selected_track,tracks):
+    if tracks[selected_track] == "Track 1":
+        music_track =  "music/background_music1.mp3"
+    elif tracks[selected_track] == "Track 2":
+            music_track = "music/background_music2.mp3"
+    elif tracks[selected_track] == "Track 3":
+        music_track = "music/background_music3.mp3"
+    elif tracks[selected_track] == "Track 4":
+        music_track = "music/background_music4.mp3"
+    return music_track
 # Function to win the game 
 def win():
     font = pygame.font.Font(None, 74)
@@ -105,7 +230,7 @@ def win():
     text_rect = text.get_rect(center=(width / 2, height / 2))
     screen.blit(text, text_rect)
     pygame.display.flip()
-    pygame.mixer.music.load("game_won.wav")
+    pygame.mixer.music.load("music/game_won.wav")
     pygame.mixer.music.play()
     pygame.time.wait(2000)
     pygame.quit()
@@ -122,7 +247,7 @@ def lose():
     text_rect = text.get_rect(center=(width / 2, height / 2))
     screen.blit(text, text_rect)
     pygame.display.flip()
-    pygame.mixer.music.load("game_lost.wav")
+    pygame.mixer.music.load("music/game_lost.wav")
     pygame.mixer.music.play()
     pygame.time.wait(2000)
     pygame.quit()
@@ -157,7 +282,7 @@ def game_start():
     time.sleep(2)
     
     # Starting music
-    pygame.mixer.music.load("start_game.mp3")
+    pygame.mixer.music.load("music/start_game.mp3")
     pygame.mixer.music.play()
 
     # Countdown
@@ -168,7 +293,7 @@ def game_start():
     
 
     # Start the background music
-    pygame.mixer.music.load("background_music.mp3")
+    pygame.mixer.music.load(music_track)
     pygame.mixer.music.play(-1)  # -1 means the music will loop indefinitely
 
 def draw_number(number):
@@ -185,7 +310,9 @@ def draw_number(number):
 # Main game loop
 running = True
 mode = intro()
-    
+ball_color = choose_ball_color()
+music_track = choose_music_track()
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -214,7 +341,7 @@ while running:
 
 
     ball.x += ball_speed_x
-    ball.y += ball_speed_y  
+    ball.y += ball_speed_y
 
     if ball.left <= 0 or ball.right >= width:
         ball_speed_x = -ball_speed_x
@@ -243,7 +370,10 @@ while running:
 
                     # Check if all blocks are destroyed
                     if score == 112:
-                        win()
+                        if mode == "Infinite":
+                            pass
+                        else:
+                            win()
 
     update_time()
     draw_objects()
@@ -251,7 +381,6 @@ while running:
     # Update the display
     pygame.display.flip()
 
-    # Add a 2 second grace period at the game starts to allow the player to get ready
     if first == True:
         game_start()
 
