@@ -3,14 +3,13 @@ import sys
 import time
 import random
 
-
 # Initialize Pygame and the audio mixer
 pygame.init()
 pygame.mixer.init()
 
 # Set up the display
 screen = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Breakout Menu") 
+pygame.display.set_caption("Breakout Menu")
 
 # Variable to check if the game is running for the first time
 first = True
@@ -51,6 +50,21 @@ width, height = screen.get_size()
 # Set up the clock
 clock = pygame.time.Clock()
 
+# Power-up variables
+power_ups = []
+power_up_chance = 0.2
+shield_active = False
+shield_duration = 0
+
+class PowerUp:
+    def __init__(self, x, y):
+        self.rect = pygame.Rect(x, y, 20, 20)
+        self.color = (0, 0, 255)
+        self.speed = 5
+
+    def fall(self):
+        self.rect.y += self.speed
+
 def intro():
     font = pygame.font.Font(None, 74)
     screen.fill((0, 0, 0))
@@ -63,10 +77,9 @@ def intro():
     return mode
 
 def show_menu():
-
     font = pygame.font.Font(None, 74)
     screen.fill((0, 0, 0))
-    modes = ["Standard", "No Death", "Hard Mode", "Infinite" , "Exit"]
+    modes = ["Standard", "No Death", "Hard Mode", "Infinite", "Exit"]
     selected_mode = 0
 
     while True:
@@ -95,13 +108,10 @@ def show_menu():
 
         pygame.display.flip()
 
-
-
-
 def choose_ball_color():
     font = pygame.font.Font(None, 20)
     screen.fill((0, 0, 0))
-    balls = ["White", "Blue", "Green", "Red", "Yellow", "Purple", "Orange" ]
+    balls = ["White", "Blue", "Green", "Red", "Yellow", "Purple", "Orange"]
     selected_ball = 0
     ball_color = (255, 255, 255)
 
@@ -120,7 +130,7 @@ def choose_ball_color():
                         pygame.quit()
                         sys.exit()
                     else:
-                       return ball_color
+                        return ball_color
         screen.fill((0, 0, 0))
 
         if balls[selected_ball] == "White":
@@ -145,18 +155,15 @@ def choose_ball_color():
         text_rect = text.get_rect(center=(width / 2, height / 2 - 45))
         screen.blit(text, text_rect)
 
-
         up_arrow = font.render("^", True, color)
-        up_arrow_rect = up_arrow.get_rect(center=(width / 2 , height / 2 + 25))  
+        up_arrow_rect = up_arrow.get_rect(center=(width / 2, height / 2 + 25))
         screen.blit(up_arrow, up_arrow_rect)
 
         down_arrow = font.render("v", True, color)
         down_arrow_rect = down_arrow.get_rect(center=(width / 2, height / 2 + 80))
-        screen.blit(down_arrow, down_arrow_rect)     
-
+        screen.blit(down_arrow, down_arrow_rect)
 
         pygame.draw.ellipse(screen, ball_color, ball)
-
 
         pygame.display.flip()
 
@@ -169,7 +176,6 @@ def choose_music_track():
     pygame.mixer.music.play(-1)
 
     while True:
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -177,23 +183,17 @@ def choose_music_track():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     selected_track = (selected_track - 1) % len(tracks)
-                    music_track = track_selector(selected_track,tracks)
+                    music_track = track_selector(selected_track, tracks)
                     pygame.mixer.music.load(music_track)
                     pygame.mixer.music.play(-1)
-                    
                 elif event.key == pygame.K_DOWN:
                     selected_track = (selected_track + 1) % len(tracks)
-                    music_track = track_selector(selected_track,tracks)
+                    music_track = track_selector(selected_track, tracks)
                     pygame.mixer.music.load(music_track)
                     pygame.mixer.music.play(-1)
                 elif event.key == pygame.K_RETURN:
                     pygame.mixer.music.stop()
                     return music_track
-                
-        
-
-
-        
 
         screen.fill((0, 0, 0))
 
@@ -209,17 +209,19 @@ def choose_music_track():
             screen.blit(text, text_rect)
 
         pygame.display.flip()
-def track_selector(selected_track,tracks):
+
+def track_selector(selected_track, tracks):
     if tracks[selected_track] == "Track 1":
-        music_track =  "music/background_music1.mp3"
+        music_track = "music/background_music1.mp3"
     elif tracks[selected_track] == "Track 2":
-            music_track = "music/background_music2.mp3"
+        music_track = "music/background_music2.mp3"
     elif tracks[selected_track] == "Track 3":
         music_track = "music/background_music3.mp3"
     elif tracks[selected_track] == "Track 4":
         music_track = "music/background_music4.mp3"
     return music_track
-# Function to win the game 
+
+# Function to win the game
 def win():
     font = pygame.font.Font(None, 74)
     screen.fill((0, 0, 0))
@@ -236,7 +238,7 @@ def win():
     pygame.quit()
     sys.exit()
 
-# Function to lose the game 
+# Function to lose the game
 def lose():
     font = pygame.font.Font(None, 74)
     screen.fill((0, 0, 0))
@@ -275,12 +277,20 @@ def draw_objects():
     # Draw the ball
     pygame.draw.ellipse(screen, ball_color, ball)
 
+    # Draw power-ups
+    for power_up in power_ups:
+        pygame.draw.rect(screen, power_up.color, power_up.rect)
+
+    # Draw shield indicator
+    if shield_active:
+        pygame.draw.rect(screen, (0, 0, 255), (10, height - 30, 20, 20))
+
 def game_start():
-    #Initial delay
+    # Initial delay
     global first
     first = False
     time.sleep(2)
-    
+
     # Starting music
     pygame.mixer.music.load("music/start_game.mp3")
     pygame.mixer.music.play()
@@ -290,7 +300,6 @@ def game_start():
     draw_number("2")
     draw_number("1")
     draw_number("Go!")
-    
 
     # Start the background music
     pygame.mixer.music.load(music_track)
@@ -304,8 +313,6 @@ def draw_number(number):
     pygame.display.flip()
     pygame.time.wait(1000)
     draw_objects()
-
-
 
 # Main game loop
 running = True
@@ -334,11 +341,10 @@ while running:
         player_width += 5
 
     if mode == "Hard Mode":
-        if random.randint(0,200) == 12:
+        if random.randint(0, 200) == 12:
             ball_speed_x = -ball_speed_x
-        if random.randint(0,200) == 24:
+        if random.randint(0, 200) == 24:
             ball_speed_y = -ball_speed_y
-
 
     ball.x += ball_speed_x
     ball.y += ball_speed_y
@@ -349,13 +355,15 @@ while running:
         ball_speed_y = -ball_speed_y
 
     if ball.bottom >= height:
-        if mode != "No Death":
-        # End the game and show a lose message
+        if shield_active:
+            ball_speed_y = -ball_speed_y
+            shield_duration = 0
+        elif mode != "No Death":
+            # End the game and show a lose message
             lose()
         else:
-            #bounce the ball back up
+            # Bounce the ball back up
             ball_speed_y = -ball_speed_y
-
 
     # Check for collisions
     if ball.colliderect(pygame.Rect(player_x, player_y, player_width, player_length)):
@@ -364,9 +372,9 @@ while running:
         for j in range(8):
             if blocks[i][j][5] == 1:
                 if ball.colliderect(pygame.Rect(blocks[i][j][1], blocks[i][j][2], blocks[i][j][3], blocks[i][j][4])):
+                    ball_speed_y = -ball_speed_y
                     blocks[i][j][5] = 0
                     score += 1
-                    ball_speed_y = -ball_speed_y
 
                     # Check if all blocks are destroyed
                     if score == 112:
@@ -375,13 +383,37 @@ while running:
                         else:
                             win()
 
+                    # Chance to drop a power-up
+                    if random.random() < power_up_chance:
+                        power_ups.append(PowerUp(blocks[i][j][1], blocks[i][j][2]))
+
+    # Update power-ups
+    for power_up in power_ups[:]:
+        power_up.fall()
+        if power_up.rect.colliderect(pygame.Rect(player_x, player_y, player_width, player_length)):
+            power_ups.remove(power_up)
+            shield_active = True
+            shield_duration = pygame.time.get_ticks() + 20000  # 20 seconds
+
+    # Check shield duration
+    if shield_active and pygame.time.get_ticks() > shield_duration:
+        shield_active = False
+
     update_time()
     draw_objects()
+
+    # Draw shield timer
+    if shield_active:
+        pygame.draw.rect(screen, (0, 0, 255), (0, 590, 800, 10))
+        remaining_time = (shield_duration - pygame.time.get_ticks()) // 1000
+        font = pygame.font.Font(None, 20)
+        timer_text = font.render(str(remaining_time), True, (255, 255, 255))
+        screen.blit(timer_text, (10, height - 30))
 
     # Update the display
     pygame.display.flip()
 
-    if first == True:
+    if first:
         game_start()
 
     # Limit the frame rate to 30 FPS
