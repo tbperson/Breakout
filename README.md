@@ -1,7 +1,6 @@
 # Breakout
 The popular game "Breakout", remade in pygame
 
-
 - [Gameplay Video](https://youtu.be/zlqLr4fa7CM)
 - [Breakout](https://en.wikipedia.org/wiki/Breakout_(video_game))
 
@@ -35,3 +34,16 @@ The popular game "Breakout", remade in pygame
     python main.py
     ```
 
+## Updates
+### Update 1.1: Gamemodes
+- Introduced new game modes for varied gameplay experiences.
+- Added three new game modes:
+    - **No Death**: Play without the risk of death.
+    - **Hardmode**: Increased difficulty for a more challenging experience.
+    - **Infinite**: Endless gameplay for continuous fun.
+
+### Update 1.2: Customisation
+- Added options to customise the appearance of the ball, and select one of four music tracks to listen to while playing.
+
+### Update 1.3: Powerups
+- Implemented shield owerups that enhance gameplay, and reworked game's physics.
