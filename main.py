@@ -16,7 +16,7 @@ first = True
 score = 0
 
 # Set up the player
-player_color = (255, 0, 0)
+player_color = (255, 1, 0)
 player_width = 60
 player_length = 20
 player_y = 580
@@ -421,3 +421,4 @@ while running:
 
 pygame.quit()
 sys.exit()
+
